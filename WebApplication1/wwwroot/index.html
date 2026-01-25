@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="sv">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MQTT Dashboard</title>
-    <!-- Leaflet CSS för kartor -->
+    <!-- Leaflet CSS for maps -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
     <style>
         * {
@@ -160,7 +160,7 @@
             50% { opacity: 0.5; }
         }
 
-        /* Karta-stilar */
+        /* Map styles */
         .map-section {
             margin-bottom: 40px;
         }
@@ -216,16 +216,16 @@
         <header>
             <h1>🌐 MQTT Dashboard</h1>
             <div class="status" id="statusIndicator">
-                <span class="spinner"></span> Ansluter...
+                <span class="spinner"></span> Connecting...
             </div>
         </header>
 
-        <!-- Kartsektion för motorhemmet -->
+        <!-- Map section for motorhome -->
         <div class="map-section">
-            <h2 style="color: white; margin-bottom: 20px;">📍 Motorhemmets position</h2>
+            <h2 style="color: white; margin-bottom: 20px;">📍 Motorhome Position</h2>
             <div id="map"></div>
             <div class="map-info" id="mapInfo" style="display: none;">
-                <h3>🚐 Motorhemmet - RUTX50</h3>
+                <h3>🚐 Motorhome - RUTX50</h3>
                 <div class="location-details" id="locationDetails"></div>
             </div>
         </div>
@@ -233,13 +233,13 @@
         <div id="dashboard" class="dashboard"></div>
 
         <div class="controls">
-            <button onclick="refreshData()">🔄 Uppdatera nu</button>
-            <button onclick="clearData()">🗑️ Rensa data</button>
+            <button onclick="refreshData()">🔄 Refresh Now</button>
+            <button onclick="clearData()">🗑️ Clear Data</button>
         </div>
 
         <div class="info">
-            <p>📊 Dashboard uppdateras automatiskt varje 2 sekunder</p>
-            <p id="dataCount">Väntar på data...</p>
+            <p>📊 Dashboard updates automatically every 2 seconds</p>
+            <p id="dataCount">Waiting for data...</p>
         </div>
     </div>
 
@@ -247,29 +247,29 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
     <script>
         let mqttConnected = false;
-        const updateInterval = 2000; // 2 sekunder
+        const updateInterval = 2000; // 2 seconds
 
-        // Formatera värden för visning
+        // Format values for display
         function formatValue(value) {
-            // Försök att tolka som JSON
+            // Try to parse as JSON
             try {
                 const json = JSON.parse(value);
-                // Om det är ett objekt, formatera det snyggt
+                // If it's an object, format it nicely
                 if (typeof json === 'object' && json !== null) {
                     return JSON.stringify(json, null, 2);
                 }
             } catch (e) {
-                // Inte JSON, behandla som vanlig sträng
+                // Not JSON, treat as regular string
             }
             
-            // För mycket text - förkort
+            // Too much text - truncate
             if (value.length > 200) {
                 return value.substring(0, 200) + '...';
             }
             return value;
         }
 
-        // Få ett snyggt ikon baserat på topicnamn
+        // Get a nice icon based on topic name
         function getIconForTopic(topic) {
             const topicLower = topic.toLowerCase();
             if (topicLower.includes('alarm')) return '🚨';
@@ -284,7 +284,7 @@
             return '📌';
         }
 
-        // Uppdatera MQTT-data från servern
+        // Update MQTT data from the server
         async function refreshData() {
             try {
                 const response = await fetch('/api/mqtt-data');
@@ -300,15 +300,15 @@
                 if (Object.keys(data).length === 0) {
                     dashboard.innerHTML = `
                         <div class="empty-state" style="grid-column: 1 / -1;">
-                            <h2>⏳ Väntar på data</h2>
-                            <p>MQTT-broker är ansluten men har ännu inte tagit emot några meddelanden.</p>
+                            <h2>⏳ Waiting for Data</h2>
+                            <p>MQTT broker is connected but has not received any messages yet.</p>
                         </div>
                     `;
                     statusIndicator.className = 'status connected';
-                    statusIndicator.innerHTML = '<span class="spinner"></span> Ansluten (väntar på data)';
-                    dataCount.textContent = '0 meddelanden mottagna';
+                    statusIndicator.innerHTML = '<span class="spinner"></span> Connected (waiting for data)';
+                    dataCount.textContent = '0 messages received';
                 } else {
-                    // Skapa kort för varje MQTT-topic, sorterat alfabetiskt
+                    // Create cards for each MQTT topic, sorted alphabetically
                     let html = '';
                     const sortedData = Object.entries(data).sort((a, b) => a[0].localeCompare(b[0]));
                     
@@ -321,28 +321,28 @@
                             <div class="card">
                                 <div class="card-title">${icon} ${topic}</div>
                                 <div class="card-value" style="${isJson ? 'font-family: monospace; font-size: 0.85em;' : ''}">${escapeHtml(formattedValue)}</div>
-                                <div class="card-timestamp">Uppdaterad just nu</div>
+                                <div class="card-timestamp">Updated just now</div>
                             </div>
                         `;
                     });
                     
                     dashboard.innerHTML = html;
                     statusIndicator.className = 'status connected';
-                    statusIndicator.innerHTML = '<span class="spinner"></span> Ansluten (' + Object.keys(data).length + ' topics)';
-                    dataCount.textContent = `${Object.keys(data).length} meddelanden från MQTT-brokern`;
+                    statusIndicator.innerHTML = '<span class="spinner"></span> Connected (' + Object.keys(data).length + ' topics)';
+                    dataCount.textContent = `${Object.keys(data).length} messages from MQTT broker`;
                 }
                 
                 mqttConnected = true;
             } catch (error) {
-                console.error('Fel vid hämtning av MQTT-data:', error);
+                console.error('Error retrieving MQTT data:', error);
                 const statusIndicator = document.getElementById('statusIndicator');
                 statusIndicator.className = 'status disconnected';
-                statusIndicator.innerHTML = '❌ Frånkopplad';
+                statusIndicator.innerHTML = '❌ Disconnected';
                 mqttConnected = false;
             }
         }
 
-        // Escape HTML för säkerhet
+        // Escape HTML for security
         function escapeHtml(text) {
             const map = {
                 '&': '&amp;',
@@ -354,16 +354,16 @@
             return text.replace(/[&<>"']/g, m => map[m]);
         }
 
-        // Karthantering
+        // Map management
         let map = null;
         let marker = null;
 
         function initializeMap() {
             if (!map) {
-                // Initialisera kartan med StartPosition (Sverige)
+                // Initialize map with start position (Sweden)
                 map = L.map('map').setView([59.33, 18.07], 6);
                 
-                // Lägg till kartlager från OpenStreetMap
+                // Add map layer from OpenStreetMap
                 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                     attribution: '© OpenStreetMap contributors',
                     maxZoom: 19
@@ -374,7 +374,7 @@
         function updateMapLocation(data) {
             initializeMap();
 
-            // Hämta motorhemmet-data
+            // Get motorhome data
             const rutx50Data = data['motorhome/rutx50'];
             if (rutx50Data) {
                 try {
@@ -386,7 +386,7 @@
                     const accuracy = gpsData.accuracy;
                     const date = gpsData.date;
 
-                    // Uppdatera markören
+                    // Update marker
                     if (marker) {
                         map.removeLayer(marker);
                     }
@@ -399,17 +399,17 @@
                         })
                     }).addTo(map)
                     .bindPopup(`
-                        <strong>🚐 Motorhemmet</strong><br>
+                        <strong>🚐 Motorhome</strong><br>
                         Lat: ${lat.toFixed(6)}<br>
                         Lon: ${lon.toFixed(6)}<br>
-                        Höjd: ${altitude.toFixed(1)}m<br>
-                        Hastighet: ${speed.toFixed(1)} m/s<br>
-                        Noggrannhet: ±${accuracy.toFixed(1)}m
+                        Altitude: ${altitude.toFixed(1)}m<br>
+                        Speed: ${speed.toFixed(1)} m/s<br>
+                        Accuracy: ±${accuracy.toFixed(1)}m
                     `);
 
                     map.setView([lat, lon], 13);
 
-                    // Uppdatera info-panelen
+                    // Update info panel
                     const mapInfo = document.getElementById('mapInfo');
                     const locationDetails = document.getElementById('locationDetails');
                     mapInfo.style.display = 'block';
@@ -424,40 +424,40 @@
                             <value>${lon.toFixed(6)}</value>
                         </div>
                         <div class="location-detail">
-                            <label>📏 Höjd</label>
+                            <label>📏 Altitude</label>
                             <value>${altitude.toFixed(1)} m</value>
                         </div>
                         <div class="location-detail">
-                            <label>💨 Hastighet</label>
+                            <label>💨 Speed</label>
                             <value>${speed.toFixed(1)} m/s (${(speed * 3.6).toFixed(1)} km/h)</value>
                         </div>
                         <div class="location-detail">
-                            <label>📡 Noggrannhet</label>
+                            <label>📡 Accuracy</label>
                             <value>±${accuracy.toFixed(1)} m</value>
                         </div>
                         <div class="location-detail">
-                            <label>🕐 Tid</label>
+                            <label>🕐 Time</label>
                             <value>${date}</value>
                         </div>
                     `;
                 } catch (e) {
-                    console.error('Fel vid parsing av GPS-data:', e);
+                    console.error('Error parsing GPS data:', e);
                 }
             }
         }
 
-        // Rensa lagrad data
+        // Clear stored data
         function clearData() {
-            if (confirm('Är du säker på att du vill rensa all data?')) {
+            if (confirm('Are you sure you want to clear all data?')) {
                 document.getElementById('dashboard').innerHTML = '';
-                document.getElementById('dataCount').textContent = '0 meddelanden mottagna';
+                document.getElementById('dataCount').textContent = '0 messages received';
             }
         }
 
-        // Uppdatera data automatiskt
+        // Update data automatically
         setInterval(refreshData, updateInterval);
 
-        // Initial uppdatering
+        // Initial update
         refreshData();
     </script>
 </body>

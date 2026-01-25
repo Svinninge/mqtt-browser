@@ -1,90 +1,90 @@
 # 🌐 MQTT Browser Dashboard
 
-En modern webbbaserad dashboard för att övervaka och visualisera MQTT-meddelanden från en MQTT-broker. Perfekt för IoT-projekt, hemautomation och motorhemmet-telemetri.
+A modern web-based dashboard for monitoring and visualizing MQTT messages from an MQTT broker. Perfect for IoT projects, home automation, and motorhome telemetry.
 
 ## ✨ Features
 
-- **Real-time MQTT-monitoring** - Lyssnar på alla MQTT-topics (`#`) och visar meddelanden i realtid
-- **Interaktiv dashboard** - Snygga kort för varje topic med automatisk uppdatering
-- **Intelligenta ikoner** - Automatisk ikonisering baserat på topicnamn (temperatur 🌡️, alarm 🚨, GPS 📍, etc.)
-- **GPS-visualisering** - Integrerad Leaflet-karta för att visa motorhemmets GPS-position
-- **Responsiv design** - Fungerar perfekt på desktop, tablet och mobil
-- **JSON-formatering** - Automatisk formatering av komplexa JSON-värden
-- **Anslutningsstatus** - Visuell indikator för MQTT-anslutningsstatus
+- **Real-time MQTT monitoring** - Listens to all MQTT topics (`#`) and displays messages in real-time
+- **Interactive dashboard** - Beautiful cards for each topic with automatic updates
+- **Smart icons** - Automatic iconification based on topic names (temperature 🌡️, alarm 🚨, GPS 📍, etc.)
+- **GPS visualization** - Integrated Leaflet map to display motorhome GPS position
+- **Responsive design** - Works perfectly on desktop, tablet, and mobile
+- **JSON formatting** - Automatic formatting of complex JSON values
+- **Connection status** - Visual indicator for MQTT connection status
 
-## 🚀 Kom igång
+## 🚀 Getting Started
 
-### Förutsättningar
+### Prerequisites
 
-- .NET 9.0 SDK eller senare
-- Tillgång till en MQTT-broker (med användarnamn och lösenord)
+- .NET 9.0 SDK or later
+- Access to an MQTT broker (with username and password)
 
 ### Installation
 
 ```bash
-# Klona repot
+# Clone the repository
 git clone https://github.com/YOUR_USERNAME/mqtt-browser.git
 cd mqtt-browser
 
-# Installera dependencies
+# Install dependencies
 dotnet restore
 ```
 
-### Konfiguration
+### Configuration
 
-Uppdatera `WebApplication1/appsettings.json` med din MQTT-broker-information:
+Update `WebApplication1/appsettings.json` with your MQTT broker information:
 
 ```json
 {
   "Mqtt": {
-    "Broker": "din-mqtt-broker.com",
+    "Broker": "your-mqtt-broker.com",
     "Port": 1883,
-    "Username": "din-username",
-    "Password": "din-password"
+    "Username": "your-username",
+    "Password": "your-password"
   }
 }
 ```
 
-> ⚠️ **Säkerhet:** För utveckling, använd `appsettings.Development.json` (ignoreras av Git). För produktion, använd miljövariabler.
+> ⚠️ **Security:** For development, use `appsettings.Development.json` (ignored by Git). For production, use environment variables.
 
-### Kör projektet
+### Running the Project
 
 ```bash
 cd WebApplication1
 dotnet run
 ```
 
-Navigera till `http://localhost:5000` (eller den port som visas i konsolen).
+Navigate to `http://localhost:5000` (or the port shown in the console).
 
-## 📊 Arkitektur
+## 📊 Architecture
 
 ### Backend (C# / ASP.NET Core 9.0)
 
-- **Program.cs** - Huvudapplikation
-  - Anslutning till MQTT-broker
-  - Lagring av MQTT-meddelanden i minne
-  - API-endpoint `/api/mqtt-data` för att hämta alla meddelanden
+- **Program.cs** - Main application
+  - Connection to MQTT broker
+  - Storage of MQTT messages in memory
+  - API endpoint `/api/mqtt-data` to retrieve all messages
 
 ### Frontend (HTML/CSS/JavaScript)
 
-- **wwwroot/index.html** - Komplett dashboard
-  - Real-time uppdatering från backend
-  - Leaflet-kartintegration
-  - Dynamisk rendering av MQTT-data
-  - HTML-escaping för säkerhet
+- **wwwroot/index.html** - Complete dashboard
+  - Real-time updates from backend
+  - Leaflet map integration
+  - Dynamic rendering of MQTT data
+  - HTML escaping for security
 
 ### Dependencies
 
-- **MQTTnet** v4.3.3+ - MQTT-klientbibliotek
-- **Leaflet.js** - Kartvisualisering (via CDN)
-- **OpenStreetMap** - Kartdata (via CDN)
+- **MQTTnet** v4.3.3+ - MQTT client library
+- **Leaflet.js** - Map visualization (via CDN)
+- **OpenStreetMap** - Map data (via CDN)
 
-## 🔧 API-endpoints
+## 🔧 API Endpoints
 
 ### GET /api/mqtt-data
-Returnerar alla insamlade MQTT-meddelanden som JSON.
+Returns all collected MQTT messages as JSON.
 
-**Exempel-response:**
+**Example response:**
 ```json
 {
   "motorhome/rutx50": "{\"GPS\":{\"latitude\":59.446927,...}}",
@@ -94,39 +94,39 @@ Returnerar alla insamlade MQTT-meddelanden som JSON.
 }
 ```
 
-## 🛡️ Säkerhet
+## 🛡️ Security
 
-- ✅ MQTT-autentiseringsuppgifter lagras i konfigurationsfiler (ej hårdkodade)
-- ✅ `.gitignore` skyddar känsliga filer från versionskontroll
-- ✅ HTML-escaping förhindrar XSS-attacker
-- ⚠️ Ingen autentisering på webbgränssnittet (rekommenderas att lägga till för produktion)
-- ⚠️ Ingen persistent datalagring (data lagras endast i minne)
+- ✅ MQTT credentials stored in configuration files (not hardcoded)
+- ✅ `.gitignore` protects sensitive files from version control
+- ✅ HTML escaping prevents XSS attacks
+- ⚠️ No authentication on the web interface (recommended to add for production)
+- ⚠️ No persistent data storage (data only stored in memory)
 
-## 📝 Framtida förbättringar
+## 📝 Future Improvements
 
-- [ ] Persistent datalagring (databas)
-- [ ] Autentisering för webbgränssnittet (JWT/OAuth)
-- [ ] Historik och grafer för MQTT-data
-- [ ] Konfigurerbara uppdateringsintervall
-- [ ] Topic-filtrering och sök
-- [ ] MQTT-publisering från dashboard
+- [ ] Persistent data storage (database)
+- [ ] Web interface authentication (JWT/OAuth)
+- [ ] Data history and graphs
+- [ ] Configurable update intervals
+- [ ] Topic filtering and search
+- [ ] MQTT publishing from dashboard
 - [ ] Dark mode
-- [ ] Docker-stöd
-- [ ] Automatisk reconnection vid anslutningsfel
+- [ ] Docker support
+- [ ] Automatic reconnection on connection failure
 
-## 🐛 Kända problem
+## 🐛 Known Issues
 
-- MQTTnet-paketet uppdatering finns tillgänglig (4.3.3.952 är installerat, 4.3.3.943 efterfrågades)
-- `MqttApplicationMessage.Payload` är obsolet - bör uppdateras till `PayloadSegment`
+- MQTTnet package update available (4.3.3.952 installed, 4.3.3.943 requested)
+- `MqttApplicationMessage.Payload` is obsolete - should be updated to `PayloadSegment`
 
-## 📄 Licens
+## 📄 License
 
-MIT License - Se LICENSE-filen för detaljer.
+MIT License - See LICENSE file for details.
 
-## 👨‍💻 Bidrag
+## 👨‍💻 Contributing
 
-Bidrag är välkomna! Öppna en Issue eller Pull Request.
+Contributions are welcome! Open an Issue or Pull Request.
 
 ---
 
-Gjord med ❤️ för IoT-entusiaster
+Made with ❤️ for IoT enthusiasts

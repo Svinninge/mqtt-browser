@@ -7,18 +7,18 @@ var app = builder.Build();
 
 app.UseStaticFiles();
 
-// MQTT-konfiguration från appsettings
+// Load MQTT configuration from appsettings
 var mqttConfig = app.Configuration.GetSection("Mqtt");
 var mqttBroker = mqttConfig["Broker"] ?? "localhost";
 var mqttPort = int.Parse(mqttConfig["Port"] ?? "1883");
 var mqttUser = mqttConfig["Username"] ?? "";
 var mqttPassword = mqttConfig["Password"] ?? "";
 
-// Lagrad MQTT-data
+// Store MQTT data in memory
 var mqttData = new Dictionary<string, string>();
 var dataLock = new object();
 
-// Funktion för att ansluta till MQTT-brokern
+// Function to connect to MQTT broker
 async Task ConnectToMqtt()
 {
     try
@@ -47,13 +47,13 @@ async Task ConnectToMqtt()
 
         client.ConnectedAsync += async _ =>
         {
-            Console.WriteLine("✓ Ansluten till MQTT-broker!");
+            Console.WriteLine("✓ Connected to MQTT broker!");
             await client.SubscribeAsync(new MqttTopicFilterBuilder().WithTopic("#").Build());
         };
 
         client.DisconnectedAsync += _ =>
         {
-            Console.WriteLine("❌ Frånkopplad från MQTT-broker");
+            Console.WriteLine("❌ Disconnected from MQTT broker");
             return Task.CompletedTask;
         };
 
@@ -61,14 +61,14 @@ async Task ConnectToMqtt()
     }
     catch (Exception ex)
     {
-        Console.WriteLine($"❌ Fel vid anslutning: {ex.Message}");
+        Console.WriteLine($"❌ Connection error: {ex.Message}");
     }
 }
 
-// Starta MQTT-anslutning i bakgrunden
+// Start MQTT connection in the background
 _ = ConnectToMqtt();
 
-// API-endpoint för att hämta MQTT-data
+// API endpoint to retrieve MQTT data
 app.MapGet("/api/mqtt-data", () =>
 {
     lock (dataLock)
