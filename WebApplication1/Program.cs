@@ -1,11 +1,16 @@
 using MQTTnet;
 using MQTTnet.Client;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 var builder = WebApplication.CreateBuilder(args);
 var app = builder.Build();
 
 app.UseStaticFiles();
+
+// Open browser automatically when app starts
+var startupCompleted = false;
+var startupLock = new object();
 
 // Load MQTT configuration from appsettings
 var mqttConfig = app.Configuration.GetSection("Mqtt");
@@ -86,6 +91,30 @@ app.MapGet("/", async (HttpContext context) =>
         return Results.Content(content, "text/html");
     }
     return Results.NotFound();
+});
+
+app.Lifetime.ApplicationStarted.Register(() =>
+{
+    lock (startupLock)
+    {
+        if (!startupCompleted)
+        {
+            startupCompleted = true;
+            // Open browser after a short delay to ensure server is ready
+            Task.Delay(1000).ContinueWith(_ =>
+            {
+                try
+                {
+                    var url = "http://localhost:5187";
+                    Process.Start(new ProcessStartInfo { FileName = url, UseShellExecute = true });
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Could not open browser: {ex.Message}");
+                }
+            });
+        }
+    }
 });
 
 app.Run();
